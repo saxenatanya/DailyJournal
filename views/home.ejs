@@ -5,14 +5,11 @@
         <h1>Home</h1>
         <p><%= StartingContent %></p>
     </div>
-
-   
-
     <% posts.forEach((post) =>{%>
         <div class="container ">
             <h1><%= post.title %></h1>
             <p  id="post"><%= post.content %>
-                <a href="/posts/<%=post.title%>">Raed more</a>
+                <a href="/posts/<%=post._id%>">Raed more</a>
             </p>
         </div>
       
