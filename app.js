@@ -4,7 +4,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const mongoose = require('mongoose');
-var _ = require('lodash');
+var _ = require("lodash");
 const port = process.env.port || 8000;
 
 const homeStartingContent = "Lacus vel facilisis volutpat est velit egestas dui id ornare. Semper auctor neque vitae tempus quam. Sit amet cursus sit amet dictum sit amet justo. Viverra tellus in hac habitasse. Imperdiet proin fermentum leo vel orci porta. Donec ultrices tincidunt arcu non sodales neque sodales ut. Mattis molestie a iaculis at erat pellentesque adipiscing. Magnis dis parturient montes nascetur ridiculus mus mauris vitae ultricies. Adipiscing elit ut aliquam purus sit amet luctus venenatis lectus. Ultrices vitae auctor eu augue ut lectus arcu bibendum at. Odio euismod lacinia at quis risus sed vulputate odio ut. Cursus mattis molestie a iaculis at erat pellentesque adipiscing.";
@@ -17,6 +17,7 @@ app.set('view engine', 'ejs');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
+
 
 // mongoose.connect("mongodb://127.0.0.1:27017/BlogejsDB",{useNewUrlParser:true});
 mongoose.connect("mongodb://localhost:27017/blogejsDB", { useNewUrlParser: true });
@@ -31,10 +32,12 @@ const Post =  mongoose.model("Post",postSchema);
 const allPostData=[];
 
 app.get("/", (req, res) => {
+ Post.find({},(err,foundPost) =>{
   res.render("home", {
     StartingContent: homeStartingContent,
-    posts:allPostData
+    posts:foundPost
   });
+    });
 });
 
 app.get("/about", (req, res) => {
@@ -54,30 +57,29 @@ app.get("/compose", (req, res) => {
 });
 
 app.post("/compose",(req,res)=>{
-const postData ={
+const post = new Post({
   title:req.body.composeTitle,
-  content:req.body.composeTextBox
-};
+  postBlog:req.body.composeTextBox
+});
+post.save((err) =>{
+  if(!err){
+    res.redirect("/");
+  }
+})
 
-allPostData.push(postData);
-// console.log(postData);
-// console.log(allPostData);
 res.redirect("/");
 });
 
-app.get("/posts/:postName",(req,res)=>{
-  let titleName = req.params.postName.toLowerCase();
-  allPostData.forEach(post => {
-      var storedTitle = post.title.toLowerCase();
-      if(storedTitle === titleName){
-        console.log("match found");
-        res.render("post",{
-          postTitle :post.title,
-          postContent :post.content
-        });
-
-      }
+app.get("/posts/:postId",(req,res)=>{
+  let requestedPostId = req.params.postId;
+  // const requestedPostId = req.params.postId;
+  Post.findOne({_id: requestedPostId}, function(err, post){
+    res.render("post", {
+      postTitle: post.title,
+      postContent: post.postBlog
+    });
   });
+
 
   });
 
